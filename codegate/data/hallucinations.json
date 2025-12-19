@@ -1,0 +1,68 @@
+[
+  {
+    "name": "skimage",
+    "reason": "Risk of Slopsquatting. The real package is 'scikit-image'. 'skimage' is the import name, not the install name.",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "sklearn",
+    "reason": "Risk of Slopsquatting. The real package is 'scikit-learn'. 'sklearn' is the import name.",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "cv2",
+    "reason": "Malware Risk. The real package is 'opencv-python'. 'cv2' is often squatted by attackers.",
+    "risk_level": "critical",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "PIL",
+    "reason": "Risk of Slopsquatting. The real package is 'Pillow'. 'PIL' was the old library (dead since 2011).",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "bs4",
+    "reason": "Risk of Slopsquatting. The real package is 'beautifulsoup4'. 'bs4' is just the import name.",
+    "risk_level": "medium",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "yaml",
+    "reason": "Risk of Slopsquatting. The real package is 'PyYAML'. 'yaml' is the import name.",
+    "risk_level": "medium",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "alsaaudio",
+    "reason": "Trap. The real package is 'pyalsaaudio'. 'alsaaudio' is a frequent target for takeover.",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "google",
+    "reason": "Namespace Confusion. The real packages are 'google-cloud-x' or 'google-api-python-client'.",
+    "risk_level": "low",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "dotenv",
+    "reason": "Trap. The real package is 'python-dotenv'. 'dotenv' is a different, abandoned project.",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "langchain-community-pack",
+    "reason": "Known Hallucination. AI agents frequently invent this package name. It does not exist.",
+    "risk_level": "critical",
+    "date_added": "2025-12-15"
+  },
+  {
+    "name": "huggingface-cli",
+    "reason": "Known Hallucination. The real CLI is installed via 'huggingface_hub'.",
+    "risk_level": "high",
+    "date_added": "2025-12-15"
+  }
+]

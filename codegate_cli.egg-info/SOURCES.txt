@@ -1,0 +1,16 @@
+MANIFEST.in
+README.md
+requirements.txt
+setup.py
+codegate/__init__.py
+codegate/crawler.py
+codegate/main.py
+codegate/prober.py
+codegate/resolver.py
+codegate/data/hallucinations.json
+codegate_cli.egg-info/PKG-INFO
+codegate_cli.egg-info/SOURCES.txt
+codegate_cli.egg-info/dependency_links.txt
+codegate_cli.egg-info/entry_points.txt
+codegate_cli.egg-info/requires.txt
+codegate_cli.egg-info/top_level.txt
