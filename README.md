@@ -1,8 +1,8 @@
 # CodeGate CLI
 
-[![PyPI version](https://badge.fury.io/py/codegate.svg)](https://badge.fury.io/py/codegate)
+[![PyPI version](https://badge.fury.io/py/codegate.svg)](https://badge.fury.io/py/codegate-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Security: Critical](https://img.shields.io/badge/Security-Critical-red)](https://codegate.com)
+[![Security: Critical](https://img.shields.io/badge/Security-Critical-red)]()
 
 **The Supply Chain Firewall for AI Agents.**
 
