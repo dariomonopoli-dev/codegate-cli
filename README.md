@@ -25,6 +25,14 @@ Static scanners (Snyk/GitHub) cannot catch this because the code is generated on
 ```bash
 pip install codegate
 ```
+## Coming Soon: The Runtime Sandbox
+We are evolving CodeGate from a static scanner into a **Runtime Execution Control Plane**.
+Current SCA tools scan code; CodeGate will secure **behavior**.
+
+* **Ephemeral Sandboxes:** Agent `pip install` commands will run in isolated Firecracker VMs.
+* **Syscall Filtering:** Policy-gated access to network and filesystem.
+
+⭐ **Star this repo** to track the development of the Runtime Engine.
 
 ## Usage
 
