@@ -1,99 +1,133 @@
 <div align="center">
 
 # 🛡️ CodeGate
-### The Runtime Supply Chain Firewall for AI Agents
+### Zero Trust Runtime for Autonomous AI Agents
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/status-active_prototype-success.svg)]()
-[![Security](https://img.shields.io/badge/security-firecracker_vm-red)](https://firecracker-microvm.github.io/)
+[![Virtualization](https://img.shields.io/badge/Virtualization-Firecracker-orange)](https://firecracker-microvm.github.io/)
+[![Security](https://img.shields.io/badge/Security-Zero_Trust-red)]()
 
-**Prevents "Slopsquatting" and Hallucinated Package Attacks in Real-Time.**
+**The Supply Chain Firewall for the Agentic Era.**
 
-[Report Bug](https://github.com/dariomonopoli-dev/codegate-cli/issues) · [Request Runtime Access](mailto:jerryscout71@gmail.com)
+Prevents "Slopsquatting" and Hallucinated Package Attacks by isolating `pip install` in ephemeral MicroVMs.
+
+[Report Bug](https://github.com/dariomonopoli-dev/codegate-cli/issues) 
 
 </div>
 
 ---
 
-## 🚀 Quick Start (Scanner)
+## The Demo: Stopping a Runtime Attack
 
-Instantly scan a package or requirements file for **Hallucinations** (non-existent packages).
+When an AI Agent (like OpenDevin or AutoGPT) tries to install a hallucinated package, CodeGate intercepts the call, spins up a Firecracker VM, and locks the network.
 
-Install from PyPI:
+**Terminal Output:**
+```text
+$ codegate install huggingface-cli
 
-- PyPI: https://pypi.org/project/codegate-cli/
-
-```bash
-pip install codegate-cli
+🛡️ [Security Risk] Package 'huggingface-cli' is UNKNOWN.
+🔥 Spinning up Firecracker MicroVM for isolation...
+⚙️ [Sandbox] Configuring VM Resources...
+   └── Kernel Arg Injection: 'pip install huggingface-cli'
+   └── Network Tap: tap0 -> Gatekeeper(192.168.1.1:8080)
+🚀 [Sandbox] IGNITION. Booting VM...
+⏳ Sandboxed Installation in progress (Monitored)...
+⛔ [Gatekeeper] BLOCKED: Outbound connection to malicious C2: malicious-analytics.com
+✅ Sandbox check complete. Risk mitigated.
+💀 VM Destroyed.
 ```
+## The Problem: Agents are Compromising Themselves
 
-Run the scanner:
-
-```bash
-codegate scan requirements.txt
-```
-
-Example output:
-
-```plaintext
-🔍 Analyzing 'zeta-decoder'...
-❌ [CRITICAL] Package NOT FOUND on PyPI (Hallucination Detected).
-⚠️ Risk: High probability of future typosquatting.
-⛔ Installation Blocked by CodeGate Policy.
-```
-
-## ⚠️ The Problem: Agents are Compromising Themselves
-
-AI coding agents (ChatGPT, Devin, Copilot) generate and execute code at runtime. Unlike human developers, they often **hallucinate** package names that look real but do not exist.
+AI coding agents generate and execute code at runtime. Unlike human developers, they frequently hallucinate package names.
 
 The Statistic: LLMs hallucinate package names **21.7%** of the time (Spracklen et al., 2024).
 
 The Attack: Attackers register these hallucinated names (e.g., huggingface-cli vs huggingface-hub) to inject malware.
 
-The Gap: Static scanners (Snyk, Dependabot) fail here because the malicious import is generated dynamically.
+The Failure: Standard `pip install` executes `setup.py` immediately. If an agent installs a malicious package, your host machine (and keys) are compromised instantly.
 
-## 🏗️ Architecture: The Runtime Engine
+## 🏗️ Architecture: The Split-Brain Engine
 
-CodeGate moves security from the CI/CD pipeline to the Kernel. It uses a Zero Trust architecture where every dependency installation is isolated.
+CodeGate moves security from "Scan Time" to "Run Time" using a Zero Trust architecture. It uses a hybrid approach to ensure security without killing performance.
 
 ```mermaid
+%%{init: {'theme': 'neutral', 'themeVariables': { 'primaryColor': '#ff6347', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f0f0f0'}}}%%
 graph TD
-    A[🤖 AI Agent] -->|pip install pkg| B[🛡️ CodeGate Interceptor]
-    B --> C{Analysis Engine}
-    C -->|Step 1| D[PyPI Metadata Check]
-    D -- 404 Not Found --> E[⛔ BLOCK - Hallucination]
-    D -- Package Found --> F[🔥 Firecracker Sandbox]
-    F -->|Step 2| G[Execute Install in VM]
-    G -- Malicious Behavior --> E
-    G -- Clean Execution --> H[✅ Allow Traffic]
+    agent[🤖 AI Agent / Dev] -->|pip install pkg| interceptor[🛡️ CodeGate Interceptor]
+
+    subgraph "Host Machine (Decision Engine)"
+        interceptor --> check{In Trust Graph?}
+        trust[(Cache: Top 5k PyPI)] -.- check
+    end
+
+    check -- "✅ Yes (Fast Lane)" --> host_install[🚀 Direct Host Install]
+    check -- "❌ No (Slow Lane)" --> isolation[🔥 Spin up Firecracker VM]
+
+    subgraph "Isolated Sandbox (MicroVM)"
+        isolation --> vm[📦 Ephemeral VM]
+        vm -->|Executes setup.py| net_tap[Network Tap - tap0]
+    end
+
+    net_tap -->|Traffic| gatekeeper{🧱 Gatekeeper Proxy}
+
+    gatekeeper -- "pypi.org (Verified)" --> allowed[✅ ALLOW Install]
+    gatekeeper -- "malicious.com (C2)" --> blocked[⛔ BLOCK Exfiltration]
+
+    style agent fill:#f9f,stroke:#333,stroke-width:2px
+    style host_install fill:#d4edda,stroke:#28a745,color:#155724
+    style blocked fill:#f8d7da,stroke:#721c24,color:#721c24
+    style gatekeeper stroke:#ff9900,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
-Interception: An eBPF probe on the network bridge (br0) captures all pip install traffic.
+### 1. The Trust Graph (The Fast Lane)
+To solve latency, we maintain a local index of the Top 5,000 PyPI packages (numpy, requests, pandas).
 
-Metadata Filter: Checks PyPI for package existence (404s).
+- Verified: These packages bypass the sandbox.
 
-Isolation: Installs the package inside an ephemeral Firecracker MicroVM. If the package tries to exfiltrate keys or touch the host filesystem, the VM is incinerated.
+- Performance: 0ms overhead for standard workflows.
+  
+### 2. The Firecracker Sandbox (The Slow Lane)
+Any package that is unknown is forced into isolation.
 
-## 🛠️ Usage
+- Mechanism: We spin up an ephemeral Firecracker MicroVM in <150ms.
 
-### 1. Analyzer (Static Scan)
+- Injection: The pip install command is injected directly into the kernel boot arguments
 
-Check your requirements.txt for "Shadow Dependencies"—packages that are hallucinations.
+### 3. The Gatekeeper (The Firewall)
+The VM has no internet access except through our local proxy.
+
+- Allowlist: Traffic to pypi.org and files.pythonhosted.org is allowed.
+
+- Blocklist: All other outbound traffic (C2 servers) is dropped.
+
+- Result: Even if malware runs, it cannot "phone home" to exfiltrate secrets.
+
+## 🛠️ Installation & Usage
+Prerequisites:
+- Linux (for KVM/Firecracker support) OR macOS (Simulation/Dev Mode).
+- Python 3.10+
 
 ```bash
-codegate scan requirements.txt
+pip install codegate-cli
 ```
 
-### 2. Slopsquatting Prober (Active Defense)
+### Running the Engine
 
-Actively probe your LLM to see if it is susceptible to suggesting malicious packages. This tool sends "honeytrap" prompts designed to force hallucinations.
+1. Start the Gatekeeper (The Firewall)
 
 ```bash
-codegate probe --prompt "I need a Python library to parse X-Financial-98 logs"
+codegate gatekeeper
 ```
 
-If the AI suggests a package that doesn't exist, CodeGate alerts you that your agent is vulnerable.
+2. Install a Package (The Wrapper)
+```bash
+codegate install <package_name>
+```
+## Utilities (Scanner & Prober)
+We still include our original research tools for static analysis:
+- `codegate scan requirements.txt`: Detects "Shadow Dependencies" (typosquats/hallucinations) in static files.
+- `codegate probe`: Actively prompts your LLM to see if it is susceptible to suggesting malicious packages.
 
 ## 📊 Research & Validation
 
