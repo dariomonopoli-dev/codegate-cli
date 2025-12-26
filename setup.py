@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="codegate-cli",
-    version="0.1.5",
+    version="0.1.6",
     description="The Supply Chain Firewall for AI Agents. Detects hallucinated dependencies.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

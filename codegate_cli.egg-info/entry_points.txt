@@ -1,3 +1,2 @@
 [console_scripts]
 codegate = codegate.cli:main
-
