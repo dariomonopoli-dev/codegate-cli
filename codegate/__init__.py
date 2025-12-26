@@ -1,8 +1,14 @@
+"""
+Codegate CLI.
 
-__version__ = "0.1.4"
+Security guardrails for AI agents and package installation.
+"""
 
-from .analysis.crawler import PyPICrawler
-from .analysis.prober import HallucinationProber
-from .analysis.resolver import PackageResolver
+from importlib.metadata import version, PackageNotFoundError
 
-__all__ = ["PyPICrawler", "HallucinationProber", "PackageResolver"]
+try:
+    __version__ = version("codegate-cli")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
+__all__ = ["__version__"]
