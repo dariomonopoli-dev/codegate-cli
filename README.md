@@ -1,7 +1,13 @@
 <div align="center">
 
-# 🛡️ CodeGate  
-### Supply-Chain Guardrails for AI Agents
+<img src="./assets/codegate_logo.png" alt="CodeGate logo" width="120" />
+
+# CodeGate  
+### Guardrails for AI Agents
+
+Prevent hallucinated and malicious dependencies from executing at runtime.
+
+
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
@@ -24,14 +30,15 @@ It works at runtime, requires no agent integration, and is fully opt-in.
 pip install codegate-cli
 codegate activate
 
-codegate run -- pip install requests   # ✅ allowed
-codegate run -- pip install dotenv     # ⛔ blocked
+pip install requests     # ✅ allowed
+pip install dotenv       # ⛔ blocked
 ```
 
 Output:
 ```
 Blocked by CodeGate (known hallucination):
   dotenv → use python-dotenv instead
+
 ```
 
 ---
@@ -67,13 +74,13 @@ CodeGate blocks those installs before they execute.
 
 ## How it works
 
-1. `codegate run` injects a guarded PATH for that process only
-2. `pip install` is intercepted by a transparent shim
+1. `codegate activate` installs a guarded pip shim in PATH
+2. Any `pip install` is intercepted before execution
 3. Known hallucinated or malicious packages are denied before execution
 4. Unknown packages are evaluated against explicit execution policies
 5. Allowed installs are delegated to the real `pip`
 
-No global hijacking. No hidden behavior.
+CodeGate only affects environments where it is explicitly activated.
 
 ---
 
@@ -83,7 +90,7 @@ No global hijacking. No hidden behavior.
 pip install codegate-cli
 ```
 
-Activate CodeGate (dev-friendly by default):
+Activate CodeGate:
 
 ```bash
 codegate activate
@@ -94,8 +101,9 @@ codegate activate
 ## Usage (recommended)
 
 ```bash
-codegate run -- pip install numpy
-codegate run -- python my_agent.py
+pip install numpy
+pip install requests
+
 ```
 
 If the agent runs `pip install`, CodeGate is enforced.
@@ -111,7 +119,16 @@ codegate activate --strict
 Strict mode fails closed:  
 if the security scanner is unreachable or denies a dependency, the installation is blocked.
 
+## Scoped execution (advanced)
+
+If you want to limit enforcement to a single command or process:
+
+```bash
+codegate run -- pip install numpy
+codegate run -- python my_agent.py
+```
 ---
+
 ## MCP (Agent Integration)
 
 CodeGate can optionally expose its policy decisions to autonomous agents
@@ -124,6 +141,7 @@ Agent integration is optional — CodeGate enforces policies
 even without agent awareness.
 
 See: https://github.com/dariomonopoli-dev/codegate-mcp
+---
 
 ## Trust model
 
@@ -135,6 +153,7 @@ CodeGate is intentionally opt-in and inspectable.
 - Fully open source
 
 ---
+
 
 ## Firecracker & isolation (roadmap)
 
