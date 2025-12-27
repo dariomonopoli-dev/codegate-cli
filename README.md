@@ -112,6 +112,18 @@ Strict mode fails closed:
 if the security scanner is unreachable or denies a dependency, the installation is blocked.
 
 ---
+## MCP (Agent Integration)
+
+CodeGate can optionally expose its policy decisions to autonomous agents
+via the Model Context Protocol (MCP).
+
+This allows agents to check whether a dependency is allowed
+*before* attempting installation.
+
+Agent integration is optional — CodeGate enforces policies
+even without agent awareness.
+
+See: https://github.com/dariomonopoli-dev/codegate-mcp
 
 ## Trust model
 
