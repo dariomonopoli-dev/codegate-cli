@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/codegate_logo.png" alt="CodeGate logo" width="120" />
+<img src="./assets/codegate_logo.png" alt="CodeGate logo" width="200" />
 
 # CodeGate  
 ### Guardrails for AI Agents
