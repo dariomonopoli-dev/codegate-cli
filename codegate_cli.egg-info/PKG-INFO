@@ -1,10 +1,11 @@
 Metadata-Version: 2.4
 Name: codegate-cli
-Version: 0.1.6
-Summary: The Supply Chain Firewall for AI Agents. Detects hallucinated dependencies.
+Version: 0.1.7
+Summary: Guardrails that prevent AI agents from installing malicious or hallucinated dependencies.
 Home-page: https://github.com/dariomonopoli-dev/codegate-cli
 Author: Dario Monopoli
 Author-email: jerryscout71@gmail.com
+Keywords: ai security supply-chain agents pip malware mcp
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
@@ -21,6 +22,7 @@ Dynamic: classifier
 Dynamic: description
 Dynamic: description-content-type
 Dynamic: home-page
+Dynamic: keywords
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
@@ -35,9 +37,10 @@ Dynamic: summary
 [![Virtualization](https://img.shields.io/badge/Virtualization-Firecracker-orange)](https://firecracker-microvm.github.io/)
 [![Security](https://img.shields.io/badge/Security-Zero_Trust-red)]()
 
-**The Supply-Chain Firewall for the Agentic Era.**
+**Guardrails that stop AI agents from installing malicious dependencies.**
 
-CodeGate prevents hallucinated and dangerous dependencies when AI agents run `pip install`.  
+
+CodeGate prevents hallucinated and malicious dependencies from executing when AI agents run `pip install`. 
 It works at runtime, requires no agent integration, and is fully opt-in.
 
 </div>
@@ -95,8 +98,8 @@ CodeGate blocks those installs before they execute.
 
 1. `codegate run` injects a guarded PATH for that process only
 2. `pip install` is intercepted by a transparent shim
-3. Known hallucinated packages are blocked immediately
-4. Unknown packages are optionally checked by a policy engine
+3. Known hallucinated or malicious packages are denied before execution
+4. Unknown packages are evaluated against explicit execution policies
 5. Allowed installs are delegated to the real `pip`
 
 No global hijacking. No hidden behavior.
@@ -122,8 +125,6 @@ codegate activate
 ```bash
 codegate run -- pip install numpy
 codegate run -- python my_agent.py
-codegate run -- claude-code
-codegate run -- aider
 ```
 
 If the agent runs `pip install`, CodeGate is enforced.

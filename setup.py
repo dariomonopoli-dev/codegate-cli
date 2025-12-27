@@ -3,11 +3,14 @@ from setuptools import setup, find_packages
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
+with open("README.md", encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name="codegate-cli",
-    version="0.1.6",
-    description="The Supply Chain Firewall for AI Agents. Detects hallucinated dependencies.",
-    long_description=open("README.md").read(),
+    version="0.1.7",
+    description="Guardrails that prevent AI agents from installing malicious or hallucinated dependencies.",
+    long_description=long_description,
     long_description_content_type="text/markdown",
     author="Dario Monopoli",
     author_email="jerryscout71@gmail.com",
@@ -19,6 +22,7 @@ setup(
             'codegate=codegate.cli:main',
         ],
     },
+    keywords="ai security supply-chain agents pip malware mcp",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

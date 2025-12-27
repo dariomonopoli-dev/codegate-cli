@@ -6,8 +6,9 @@ import sys
 
 from codegate.config import load_config
 from codegate.pip_parse import parse_pip_install_args
-from codegate.scanner import authorize_pip_install
 from codegate.shims import shim_dir
+from urllib import request, error
+from typing import Any
 
 import json
 from importlib import resources
@@ -63,7 +64,46 @@ def main() -> int:
 
     return run_pip(args)
 
+def _authorize_pip_install(api_base: str, requirements: list[dict[str, Any]], timeout_s: float = 5.0) -> dict[str, Any]:
+    api_base = (api_base or "").strip()
+    if not api_base:
+        raise RuntimeError("scanner api_base is empty")
+
+    url = api_base.rstrip("/") + "/authorize/pip"
+    print("[codegate] scanner url:", url, file=sys.stderr)
+    payload = json.dumps({"requirements": requirements}).encode("utf-8")
+
+    req = request.Request(
+        url=url,
+        data=payload,
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with request.urlopen(req, timeout=timeout_s) as resp:
+            body = resp.read().decode("utf-8", errors="replace").strip()
+    except error.HTTPError as e:
+        try:
+            msg = e.read().decode("utf-8", errors="replace")
+        except Exception:
+            msg = e.reason
+        raise RuntimeError(f"scanner HTTP {e.code}: {msg}")
+    except error.URLError as e:
+        raise RuntimeError(str(e))
+
+    try:
+        data = json.loads(body) if body else {}
+    except Exception:
+        raise RuntimeError(f"scanner returned non-JSON: {body[:200]}")
+
+    if not isinstance(data, dict) or "allow" not in data:
+        raise RuntimeError(f"scanner returned invalid response: {body[:200]}")
+
+    return data
+
 def run_pip(args: list[str]) -> int:
+    print("[codegate] runners file:", __file__, file=sys.stderr)
     cfg = load_config()
     api_base = str(cfg.get("api_base", "")).strip()
     fail_open = bool(cfg.get("fail_open", False))
@@ -75,6 +115,9 @@ def run_pip(args: list[str]) -> int:
         return _exec(real_pip, args)
 
     subcmd = args[0]
+    print("[codegate] pip argv:", args, file=sys.stderr)
+    print("[codegate] api_base:", api_base, "fail_open:", fail_open, file=sys.stderr)
+
     if subcmd != "install":
         return _exec(real_pip, args)
 
@@ -82,6 +125,8 @@ def run_pip(args: list[str]) -> int:
 
     try:
         reqs = parse_pip_install_args(install_args)
+        print("[codegate] parsed reqs:", [getattr(r, "raw", None) for r in reqs], file=sys.stderr)
+
     except Exception as e:
         print(f"Blocked (unsupported pip install pattern in MVP): {e}", file=sys.stderr)
         return 1
@@ -104,17 +149,26 @@ def run_pip(args: list[str]) -> int:
         return 1
 
     try:
-        decision = authorize_pip_install(
+        print("[codegate] BEFORE_SCANNER", file=sys.stderr)
+        sys.stderr.flush()
+
+        decision = _authorize_pip_install(
             api_base=api_base,
             requirements=[{"name": r.name, "version": r.version, "raw": r.raw} for r in reqs],
         )
+        print("[codegate] scanner decision:", decision, file=sys.stderr)
+
+
     except Exception as e:
+        print(f"[codegate] scanner error: {e}", file=sys.stderr)
         if fail_open:
             return _exec(real_pip, args)
         print(f"Blocked: scanner error ({e}).", file=sys.stderr)
         return 1
 
     if bool(decision.get("allow", False)):
+
+
         extra = decision.get("extra_pip_args") or []
         if not isinstance(extra, list):
             extra = []

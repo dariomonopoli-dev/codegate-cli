@@ -9,31 +9,17 @@ from pathlib import Path
 from codegate.config import load_config, save_config
 from codegate.shims import install_pip_shims, remove_pip_shims, shim_dir, shim_first_in_path, shim_dir, install_codegate_launcher
 
-
-def _shell_rc_hint() -> str:
-    shell = os.environ.get("SHELL", "")
-    if shell.endswith("zsh"):
-        return "~/.zshrc"
-    if shell.endswith("bash"):
-        return "~/.bashrc"
-    return "your shell rc file (e.g. ~/.zshrc)"
-
-def _which(cmd: str) -> str | None:
-    return shutil.which(cmd)
-
 def main():
     p = argparse.ArgumentParser(prog="codegate")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     a = sub.add_parser("activate", help="Install pip shims + configure scanner endpoint")
-    a.add_argument("--api", default="http://localhost:8080", help="Scanner API base URL")
+    a.add_argument("--api", default="http://127.0.0.1:8080", help="Scanner API base URL")
     a.add_argument("--strict", action="store_true", help="Fail closed if scanner is unreachable (recommended for CI)")
 
     sub.add_parser("status", help="Show config and shim presence")
     sub.add_parser("doctor", help="Verify that pip is intercepted")
     sub.add_parser("deactivate", help="Remove shims (manual PATH cleanup if you added it)")
-
-    # dentro main() in codegate/cli.py
 
     r = sub.add_parser("run", help="Run a command with Codegate shims enabled (PATH is modified for this process only)")
     r.add_argument("--", dest="dashdash", action="store_true", help=argparse.SUPPRESS)
@@ -53,7 +39,13 @@ def main():
         print("Installed shims:")
         for sp in paths:
             print("  ,", sp)
-        
+        print("\nNext step (recommended): enable protected pip in this shell:\n")
+        print(f'  export PATH="{shim_dir()}:$PATH"')
+        print("  hash -r\n")
+        print("After that, you can keep using pip as usual:")
+        print("  pip install requests\n")
+
+                
 
     elif args.cmd == "status":
         cfg = load_config()
@@ -64,7 +56,6 @@ def main():
         if cg.exists():
             try:
                 first = cg.read_text(encoding="utf-8").splitlines()
-                # find the line that contains -m codegate.cli
                 line = next((l for l in first if " -m codegate.cli " in l or " -m codegate.cli" in l), "")
                 print("Shim python:", line.strip() or "(could not detect)")
             except Exception as e:
@@ -102,12 +93,12 @@ def main():
 
             expected = os.path.abspath(str(shim_dir() / "pip"))
             if os.path.abspath(resolved) == expected:
-                print("\n✅ OK: `codegate run -- pip ...` is protected.")
+                print("\nOK: `codegate run -- pip ...` is protected.")
             else:
-                print("\n⚠️ Warning: pip does not resolve to the shim under codegate-run.")
+                print("\nWarning: pip does not resolve to the shim under codegate-run.")
                 print("   This is unexpected. Try re-running `codegate activate`.")
         except Exception as e:
-            print("\n⚠️ Warning: could not run self-check:", e)
+            print("\nWarning: could not run self-check:", e)
 
         print("\nUsage:")
         print("  codegate run -- <command>")

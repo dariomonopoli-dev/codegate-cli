@@ -8,9 +8,10 @@
 [![Virtualization](https://img.shields.io/badge/Virtualization-Firecracker-orange)](https://firecracker-microvm.github.io/)
 [![Security](https://img.shields.io/badge/Security-Zero_Trust-red)]()
 
-**The Supply-Chain Firewall for the Agentic Era.**
+**Guardrails that stop AI agents from installing malicious dependencies.**
 
-CodeGate prevents hallucinated and dangerous dependencies when AI agents run `pip install`.  
+
+CodeGate prevents hallucinated and malicious dependencies from executing when AI agents run `pip install`. 
 It works at runtime, requires no agent integration, and is fully opt-in.
 
 </div>
@@ -68,8 +69,8 @@ CodeGate blocks those installs before they execute.
 
 1. `codegate run` injects a guarded PATH for that process only
 2. `pip install` is intercepted by a transparent shim
-3. Known hallucinated packages are blocked immediately
-4. Unknown packages are optionally checked by a policy engine
+3. Known hallucinated or malicious packages are denied before execution
+4. Unknown packages are evaluated against explicit execution policies
 5. Allowed installs are delegated to the real `pip`
 
 No global hijacking. No hidden behavior.
